@@ -1,6 +1,8 @@
 import React from 'react'
 import { useForm } from '@mantine/form'
 import { Button, Card, Divider, Stack, TextInput, Title, Anchor } from '@mantine/core'
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore"
+import { fireDb } from '../firebaseConfig'
 
 function Register() {
   const registerForm = useForm({
@@ -11,21 +13,45 @@ function Register() {
     },
   })
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(registerForm.values);
+    try {
+      //Checking if user already exists based on email
+
+      const qry = query(
+        collection(fireDb, "users"), // getDocs -> used for getting all documents in a collections
+        where("email", "==", registerForm.values.email) //where -> specify the condition
+      );
+      const existingUsers = await getDocs(qry);
+
+      if (existingUsers.size > 0) {
+        alert("User already exists");
+        return;
+      } else {
+        const response = await addDoc(collection(fireDb, "users"), registerForm.values)
+        if (response.id) {
+          alert("User created successfully")
+        } else {
+          alert("User creation failed")
+        }
+      }
+
+    } catch (error) {
+      console.log(error)
+      alert("Something went wrong")
+    }
   }
   return (
     <div className='flex h-screen justify-center items-center'>
       <Card sx={{
         width: 400,
-        padding:'sm'
+        padding: 'sm'
       }}
-       shadow='lg'
-       withBorder
+        shadow='lg'
+        withBorder
       >
         <Title order={2} mb={5}>Register</Title>
-        <Divider variant='dotted' color='gray'/>
+        <Divider variant='dotted' color='gray' />
         <form action='' onSubmit={handleSubmit}>
           <Stack mt={5}>
             <TextInput label="Name" placeholder='Enter your name' name='name'

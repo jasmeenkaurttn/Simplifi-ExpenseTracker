@@ -1,6 +1,8 @@
 import React from 'react'
 import { useForm } from '@mantine/form'
 import { Anchor, Button, Card, Divider, Stack, TextInput, Title } from '@mantine/core'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { fireDb } from '../firebaseConfig'
 
 function Login() {
   const loginForm = useForm({
@@ -11,9 +13,23 @@ function Login() {
     },
   })
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async(event) => {
     event.preventDefault();
-    console.log(loginForm.values);
+    try {
+      const qry = query(
+        collection(fireDb, "users"), 
+        where("email", "==", loginForm.values.email),
+        where("password", "==", loginForm.values.password) 
+      );
+      const existingUsers = await getDocs(qry);
+      if(existingUsers.size > 0) {
+        alert("User logged in successfully")
+      } else {
+        alert("User not found")
+      }
+    } catch (error) {
+      alert("Something went wrong")
+    }
   }
   return (
     <div className='flex h-screen justify-center items-center'>
