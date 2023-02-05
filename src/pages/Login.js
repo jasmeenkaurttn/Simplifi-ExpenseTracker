@@ -6,8 +6,11 @@ import { fireDb } from '../firebaseConfig'
 import CryptoJS from 'crypto-js'
 import { showNotification } from '@mantine/notifications'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { HideLoading, ShowLoading } from '../redux/alertsSlice'
 
 function Login() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const loginForm = useForm({
     initialValues: {
@@ -20,6 +23,7 @@ function Login() {
   const handleSubmit = async(event) => {
     event.preventDefault();
     try {
+      dispatch(ShowLoading());
       const qry = query(
         collection(fireDb, "users"), 
         where("email", "==", loginForm.values.email),
@@ -51,11 +55,13 @@ function Login() {
         }
       } else {
         showNotification({
-          title: 'User not found',
+          title: 'User does not exist',
           color: 'red',
         })
       }
+      dispatch(HideLoading());
     } catch (error) {
+      dispatch(HideLoading())
       showNotification({
         title: 'Something went wrong',
         color: 'red',

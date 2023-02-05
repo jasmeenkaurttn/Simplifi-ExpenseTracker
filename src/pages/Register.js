@@ -5,8 +5,11 @@ import { addDoc, collection, getDocs, query, where } from "firebase/firestore"
 import { fireDb } from '../firebaseConfig'
 import CryptoJS from 'crypto-js'
 import { showNotification } from '@mantine/notifications'
+import { useDispatch } from 'react-redux'
+import { HideLoading, ShowLoading } from '../redux/alertsSlice'
 
 function Register() {
+  const dispatch = useDispatch();
   const registerForm = useForm({
     initialValues: {
       name: '',
@@ -20,6 +23,7 @@ function Register() {
     try {
       //Checking if user already exists based on email
 
+      dispatch(ShowLoading());
       const qry = query(
         collection(fireDb, "users"), // getDocs -> used for getting all documents in a collections
         where("email", "==", registerForm.values.email) //where -> specify the condition
@@ -54,8 +58,9 @@ function Register() {
           })
         }
       }
-
+      dispatch(HideLoading());
     } catch (error) {
+      dispatch(HideLoading());
       showNotification({
         title: 'Something went wrong',
         color: 'red',
