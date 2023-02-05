@@ -3,6 +3,8 @@ import { useForm } from '@mantine/form'
 import { Anchor, Button, Card, Divider, Stack, TextInput, Title } from '@mantine/core'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { fireDb } from '../firebaseConfig'
+import CryptoJS from 'crypto-js'
+import { showNotification } from '@mantine/notifications'
 
 function Login() {
   const loginForm = useForm({
@@ -19,16 +21,36 @@ function Login() {
       const qry = query(
         collection(fireDb, "users"), 
         where("email", "==", loginForm.values.email),
-        where("password", "==", loginForm.values.password) 
       );
       const existingUsers = await getDocs(qry);
       if(existingUsers.size > 0) {
-        alert("User logged in successfully")
+        // decrypt password
+        const decryptedPassword = CryptoJS.AES.decrypt(
+          existingUsers.docs[0].data().password,
+          "expense-tracker"
+        ).toString(CryptoJS.enc.Utf8)
+        if(decryptedPassword === loginForm.values.password){
+          showNotification({
+            title: 'Login Successful',
+            color: 'green',
+          })
+        } else {
+          showNotification({
+            title: 'Invalid credentials',
+            color: 'red',
+          })
+        }
       } else {
-        alert("User not found")
+        showNotification({
+          title: 'User not found',
+          color: 'red',
+        })
       }
     } catch (error) {
-      alert("Something went wrong")
+      showNotification({
+        title: 'Something went wrong',
+        color: 'red',
+      })
     }
   }
   return (
@@ -44,10 +66,17 @@ function Login() {
         <Divider variant='dotted' color='gray'/>
         <form action='' onSubmit={handleSubmit}>
           <Stack mt={5}>
-            <TextInput label="Email" placeholder='Enter your email' name='email'
+            <TextInput 
+              label="Email" 
+              placeholder='Enter your email' 
+              name='email'
               {...loginForm.getInputProps("email")}
             />
-            <TextInput label="Password" placeholder='Enter your password' name='password'
+            <TextInput 
+              label="Password" 
+              placeholder='Enter your password' 
+              name='password'
+              type='password'
               {...loginForm.getInputProps("password")}
             />
             <Button type='submit' color='violet'>Login</Button>

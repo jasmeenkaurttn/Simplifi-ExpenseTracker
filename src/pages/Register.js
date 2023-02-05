@@ -3,6 +3,8 @@ import { useForm } from '@mantine/form'
 import { Button, Card, Divider, Stack, TextInput, Title, Anchor } from '@mantine/core'
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore"
 import { fireDb } from '../firebaseConfig'
+import CryptoJS from 'crypto-js'
+import { showNotification } from '@mantine/notifications'
 
 function Register() {
   const registerForm = useForm({
@@ -25,20 +27,39 @@ function Register() {
       const existingUsers = await getDocs(qry);
 
       if (existingUsers.size > 0) {
-        alert("User already exists");
+        showNotification({
+          title: 'User already exists',
+          color: 'red',
+        })
         return;
       } else {
-        const response = await addDoc(collection(fireDb, "users"), registerForm.values)
+        // encrypt password
+        const encryptedPassword = CryptoJS.AES.encrypt(
+          registerForm.values.password,
+          "expense-tracker"
+        ).toString();
+        const response = await addDoc(collection(fireDb, "users"), {
+          ...registerForm.values,
+          password: encryptedPassword,
+        })
         if (response.id) {
-          alert("User created successfully")
+          showNotification({
+            title: 'User created successfully',
+            color: 'green',
+          })
         } else {
-          alert("User creation failed")
+          showNotification({
+            title: 'User creation failed',
+            color: 'red',
+          })
         }
       }
 
     } catch (error) {
-      console.log(error)
-      alert("Something went wrong")
+      showNotification({
+        title: 'Something went wrong',
+        color: 'red',
+      })
     }
   }
   return (
@@ -54,13 +75,23 @@ function Register() {
         <Divider variant='dotted' color='gray' />
         <form action='' onSubmit={handleSubmit}>
           <Stack mt={5}>
-            <TextInput label="Name" placeholder='Enter your name' name='name'
+            <TextInput
+              label="Name"
+              placeholder='Enter your name'
+              name='name'
               {...registerForm.getInputProps("name")}
             />
-            <TextInput label="Email" placeholder='Enter your email' name='email'
+            <TextInput 
+              label="Email" 
+              placeholder='Enter your email' 
+              name='email'
               {...registerForm.getInputProps("email")}
             />
-            <TextInput label="Password" placeholder='Enter your password' name='password'
+            <TextInput 
+              label="Password" 
+              placeholder='Enter your password' 
+              name='password'
+              type='password'
               {...registerForm.getInputProps("password")}
             />
             <Button type='submit' color='violet'>Register</Button>
