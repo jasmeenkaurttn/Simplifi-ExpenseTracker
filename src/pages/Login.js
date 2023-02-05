@@ -5,8 +5,10 @@ import { collection, getDocs, query, where } from 'firebase/firestore'
 import { fireDb } from '../firebaseConfig'
 import CryptoJS from 'crypto-js'
 import { showNotification } from '@mantine/notifications'
+import { useNavigate } from 'react-router-dom'
 
 function Login() {
+  const navigate = useNavigate();
   const loginForm = useForm({
     initialValues: {
       name: '',
@@ -34,6 +36,13 @@ function Login() {
             title: 'Login Successful',
             color: 'green',
           })
+          const datatoPutInLocalStorage = {
+            name: existingUsers.docs[0].data().name,
+            email: existingUsers.docs[0].data().email,
+            id: existingUsers.docs[0].id,
+          }
+          localStorage.setItem("user", JSON.stringify(datatoPutInLocalStorage))
+          navigate("/");
         } else {
           showNotification({
             title: 'Invalid credentials',
