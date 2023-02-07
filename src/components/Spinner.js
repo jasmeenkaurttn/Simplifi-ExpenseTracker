@@ -4,7 +4,7 @@ import { Loader } from '@mantine/core';
 function Spinner() {
   return (
     <div>
-      <Loader size="lg" variant='bars'/>
+      <Loader size="lg" />
     </div>
   )
 }

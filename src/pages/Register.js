@@ -76,7 +76,7 @@ function Register() {
         shadow='lg'
         withBorder
       >
-        <Title order={2} mb={5}>Register</Title>
+        <Title order={2} mb={5} color='gray'>REGISTER</Title>
         <Divider variant='dotted' color='gray' />
         <form action='' onSubmit={handleSubmit}>
           <Stack mt={5}>
@@ -99,8 +99,8 @@ function Register() {
               type='password'
               {...registerForm.getInputProps("password")}
             />
-            <Button type='submit' color='violet'>Register</Button>
-            <Anchor href='/login' target="_self">
+            <Button type='submit' color='teal'>Register</Button>
+            <Anchor href='/login' target="_self" color='teal'>
               Already have an account? Login
             </Anchor>
           </Stack>

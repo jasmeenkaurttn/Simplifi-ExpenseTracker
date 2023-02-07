@@ -77,7 +77,7 @@ function Login() {
        shadow='lg'
        withBorder
       >
-        <Title order={2} mb={5}>Login</Title>
+        <Title order={2} mb={5} color="gray">LOGIN</Title>
         <Divider variant='dotted' color='gray'/>
         <form action='' onSubmit={handleSubmit}>
           <Stack mt={5}>
@@ -94,8 +94,8 @@ function Login() {
               type='password'
               {...loginForm.getInputProps("password")}
             />
-            <Button type='submit' color='violet'>Login</Button>
-            <Anchor href='/register' target="_self">
+            <Button type='submit' color='teal'>Login</Button>
+            <Anchor href='/register' target="_self" color='teal'>
               Don't have an account? Register
             </Anchor>
           </Stack>
