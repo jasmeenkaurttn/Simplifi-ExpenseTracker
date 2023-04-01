@@ -2,7 +2,7 @@ import { Box, Button, Card, Modal } from '@mantine/core'
 import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import TransactionForm from '../components/TransactionForm';
-import {addDoc, collection, getDocs, query} from 'firebase/firestore'
+import {addDoc, collection, getDocs, orderBy, query} from 'firebase/firestore'
 import {fireDb} from '../firebaseConfig'
 import { showNotification } from '@mantine/notifications';
 import { useDispatch } from 'react-redux';
@@ -15,11 +15,14 @@ function Home() {
   const [transactions, setTransactions] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState("add");
-
+  const [selectedTransaction, setSelectedTransaction] = useState([]);
+  
   const getData = async () => {
     try {
       dispatch(ShowLoading())
-      const qry = query(collection(fireDb, `users/${user.id}/transactions`));
+      const qry = query(collection(fireDb, `users/${user.id}/transactions`),
+      orderBy("date", "desc")
+      );
       const res = await getDocs(qry);
       const data = res.docs.map((doc) => ({
         id: doc.id,
@@ -61,7 +64,12 @@ function Home() {
           </div>
         </div>
 
-        <TransactionTable transactions={transactions}/>
+        <TransactionTable 
+          transactions={transactions} 
+          setSelectedTransaction={setSelectedTransaction}
+          setFormMode={setFormMode}
+          setShowForm={setShowForm}
+        />
       </Card>
 
       <Modal
@@ -78,6 +86,8 @@ function Home() {
           setFormMode={setFormMode}
           setShowForm={setShowForm}
           showForm={showForm}
+          transactionData={selectedTransaction}
+          getData={getData}
         />
       </Modal>
     </Box>

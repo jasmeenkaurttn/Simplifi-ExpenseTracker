@@ -1,13 +1,14 @@
 import { Button, Select, Stack, TextInput, Group } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import React from 'react'
-import {addDoc, collection} from 'firebase/firestore'
-import {fireDb} from '../firebaseConfig'
+import React, { useEffect } from 'react'
+import { addDoc, collection, doc, setDoc } from 'firebase/firestore'
+import { fireDb } from '../firebaseConfig'
 import { showNotification } from '@mantine/notifications';
 import { useDispatch } from 'react-redux';
-import {ShowLoading, HideLoading } from '../redux/alertsSlice';
+import { ShowLoading, HideLoading } from '../redux/alertsSlice';
+import moment from 'moment'
 
-function TransactionForm({formMode, setFormMode, setShowForm, showForm}) {
+function TransactionForm({ formMode, setFormMode, setShowForm, transactionData, getData }) {
   const dispatch = useDispatch();
   // getting current user
   const user = JSON.parse(localStorage.getItem("user"));
@@ -22,20 +23,29 @@ function TransactionForm({formMode, setFormMode, setShowForm, showForm}) {
     }
   });
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       dispatch(ShowLoading())
-      await addDoc(
-        collection(
-          fireDb,
-        `users/${user.id}/transactions`, // transactions -> sub collection in user collection
-        ),
-        transactionForm.values
-      )
-      
+      if (formMode === "add") {
+        await addDoc(
+          collection(
+            fireDb,
+            `users/${user.id}/transactions`, // transactions -> sub collection in user collection
+          ),
+          transactionForm.values
+        );
+      } else {
+        setDoc(
+          doc(fireDb, `users/${user.id}/transactions`, transactionData.id),
+          transactionForm.values
+        );
+      }
+
+      getData();
+
       showNotification({
-        title: "Transaction added successfully",
+        title: formMode === "add" ? "Transaction added" :"Transaction updated",
         color: "green"
       })
       dispatch(HideLoading())
@@ -43,12 +53,20 @@ function TransactionForm({formMode, setFormMode, setShowForm, showForm}) {
     } catch (error) {
       console.log(error)
       showNotification({
-        title: "Error adding transaction",
+        title: formMode === "add" ? "Error adding transaction" : "Error updating transaction",
         color: "red"
       })
       dispatch(HideLoading())
     }
   }
+
+  useEffect(() => {
+    if (formMode === "edit") {
+      transactionForm.setValues(transactionData);
+      // converting date format to populate into modal
+      transactionForm.setFieldValue("date", moment(transactionData.date, 'YYYY-MM-DD').format("YYYY-MM-DD"));
+    }
+  }, [transactionData]);
   return (
     <div>
       {/* use stack for equal spacing */}
@@ -113,7 +131,9 @@ function TransactionForm({formMode, setFormMode, setShowForm, showForm}) {
             {...transactionForm.getInputProps("reference")}
           />
 
-          <Button color='cyan' type='submit'>ADD</Button>
+          <Button color='cyan' type='submit'>
+            {formMode === "add" ? "Add Transaction" : "Update Transaction"}
+          </Button>
         </Stack>
       </form>
     </div>

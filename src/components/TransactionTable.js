@@ -1,19 +1,36 @@
 import { Group, Table } from '@mantine/core'
 import React from 'react'
+import { createStyles } from '@mantine/core';
+import moment from 'moment';
 
-function TransactionTable({ transactions }) {
+
+const useStyles = createStyles((theme) => ({
+  hover: {
+    cursor: 'pointer',
+  }
+}))
+function TransactionTable({ transactions, setSelectedTransaction, setFormMode, setShowForm }) {
+  const {classes} = useStyles();
+
   const getRows = transactions.map((transaction) => (
     <tr key={transaction.name}>
       <td>{transaction.name}</td>
       <td>{transaction.type[0].toUpperCase() + transaction.type.slice(1)}</td>
       <td>{transaction.amount}</td>
-      <td>{transaction.date}</td>
+      <td>{moment(transaction.date).format('DD-MM-YYYY')}</td>
       <td>{transaction.category}</td>
       <td>{transaction.reference}</td>
       <td>
         <Group>
-          <i className="ri-pencil-line"></i>
-          <i className="ri-delete-bin-line"></i>
+          <i className={`${classes.hover} ri-pencil-line`}
+            onClick={() => {
+              setSelectedTransaction(transaction)
+              setFormMode("edit")
+              setShowForm(true)
+            }}>
+            {/* putting that row data into setSelectedTransaction */}
+          </i>
+          <i className={`${classes.hover} ri-delete-bin-line`}></i>
         </Group>
       </td>
     </tr>
