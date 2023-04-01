@@ -1,11 +1,45 @@
 import { Box, Button, Card, Modal } from '@mantine/core'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import TransactionForm from '../components/TransactionForm';
+import {addDoc, collection, getDocs, query} from 'firebase/firestore'
+import {fireDb} from '../firebaseConfig'
+import { showNotification } from '@mantine/notifications';
+import { useDispatch } from 'react-redux';
+import {ShowLoading, HideLoading } from '../redux/alertsSlice';
+import TransactionTable from '../components/TransactionTable';
 
 function Home() {
+  const user = JSON.parse(localStorage.getItem("user"))
+  const dispatch = useDispatch();
+  const [transactions, setTransactions] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState("add");
+
+  const getData = async () => {
+    try {
+      dispatch(ShowLoading())
+      const qry = query(collection(fireDb, `users/${user.id}/transactions`));
+      const res = await getDocs(qry);
+      const data = res.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+
+      setTransactions(data)
+      dispatch(HideLoading())
+    } catch (error) {
+      console.log(error)
+      showNotification({
+        title: "Error fetching transactions",
+        color: "red"
+      })
+      dispatch(HideLoading())
+    }
+  }
+  useEffect(() => {
+    getData()
+  },[])
   return (
     <Box>
       <Header />
@@ -26,6 +60,8 @@ function Home() {
             </Button>
           </div>
         </div>
+
+        <TransactionTable transactions={transactions}/>
       </Card>
 
       <Modal
