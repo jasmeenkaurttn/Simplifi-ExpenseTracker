@@ -41,14 +41,13 @@ function TransactionForm({ formMode, setFormMode, setShowForm, transactionData, 
           transactionForm.values
         );
       }
-
-      getData();
-
+      
       showNotification({
         title: formMode === "add" ? "Transaction added" :"Transaction updated",
         color: "green"
       })
       dispatch(HideLoading())
+      getData();
       setShowForm(false);
     } catch (error) {
       console.log(error)

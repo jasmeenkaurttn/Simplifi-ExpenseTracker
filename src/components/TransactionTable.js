@@ -2,6 +2,11 @@ import { Group, Table } from '@mantine/core'
 import React from 'react'
 import { createStyles } from '@mantine/core';
 import moment from 'moment';
+import { deleteDoc, doc } from 'firebase/firestore';
+import { fireDb } from '../firebaseConfig';
+import { useDispatch } from 'react-redux';
+import { HideLoading, ShowLoading } from '../redux/alertsSlice';
+import { showNotification } from '@mantine/notifications';
 
 
 const useStyles = createStyles((theme) => ({
@@ -9,9 +14,30 @@ const useStyles = createStyles((theme) => ({
     cursor: 'pointer',
   }
 }))
-function TransactionTable({ transactions, setSelectedTransaction, setFormMode, setShowForm }) {
+function TransactionTable({ transactions, setSelectedTransaction, setFormMode, setShowForm, getData }) {
   const {classes} = useStyles();
+  const dispatch = useDispatch();
+  const user = JSON.parse(localStorage.getItem("user"))
 
+  const deleteTransaction = async(id) => {
+    try {
+      dispatch(ShowLoading())
+      // collection path & id -> deleting a particular transaction from users transaction collection
+      await deleteDoc(doc(fireDb, `users/${user.id}/transactions`, id));
+      dispatch(HideLoading())
+      showNotification({
+        title: "Transaction deleted",
+        color: "green"
+      })
+      getData();
+    } catch (error) {
+      dispatch(HideLoading())
+      showNotification({
+        title: "Error deleting transaction",
+        color: "red"
+      })
+    }
+  }
   const getRows = transactions.map((transaction) => (
     <tr key={transaction.name}>
       <td>{transaction.name}</td>
@@ -30,7 +56,11 @@ function TransactionTable({ transactions, setSelectedTransaction, setFormMode, s
             }}>
             {/* putting that row data into setSelectedTransaction */}
           </i>
-          <i className={`${classes.hover} ri-delete-bin-line`}></i>
+          <i className={`${classes.hover} ri-delete-bin-line`}
+            onClick={() => {
+              deleteTransaction(transaction.id)
+            }}
+          ></i>
         </Group>
       </td>
     </tr>

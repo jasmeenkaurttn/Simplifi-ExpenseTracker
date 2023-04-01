@@ -69,6 +69,7 @@ function Home() {
           setSelectedTransaction={setSelectedTransaction}
           setFormMode={setFormMode}
           setShowForm={setShowForm}
+          getData={getData}
         />
       </Card>
 
