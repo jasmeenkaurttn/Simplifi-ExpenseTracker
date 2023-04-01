@@ -1,8 +1,16 @@
 import { Button, Select, Stack, TextInput, Group } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import React from 'react'
+import {addDoc, collection} from 'firebase/firestore'
+import {fireDb} from '../firebaseConfig'
+import { showNotification } from '@mantine/notifications';
+import { useDispatch } from 'react-redux';
+import {ShowLoading, HideLoading } from '../redux/alertsSlice';
 
-function TransactionForm() {
+function TransactionForm({formMode, setFormMode, setShowForm, showForm}) {
+  const dispatch = useDispatch();
+  // getting current user
+  const user = JSON.parse(localStorage.getItem("user"));
   const transactionForm = useForm({
     initialValues: {
       name: '',
@@ -14,9 +22,32 @@ function TransactionForm() {
     }
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log(transactionForm.values);
+    try {
+      dispatch(ShowLoading())
+      await addDoc(
+        collection(
+          fireDb,
+        `users/${user.id}/transactions`, // transactions -> sub collection in user collection
+        ),
+        transactionForm.values
+      )
+      
+      showNotification({
+        title: "Transaction added successfully",
+        color: "green"
+      })
+      dispatch(HideLoading())
+      setShowForm(false);
+    } catch (error) {
+      console.log(error)
+      showNotification({
+        title: "Error adding transaction",
+        color: "red"
+      })
+      dispatch(HideLoading())
+    }
   }
   return (
     <div>
@@ -70,6 +101,7 @@ function TransactionForm() {
             <TextInput
               name='date'
               label='Date'
+              type="date"
               placeholder='Enter Transaction Date'
               {...transactionForm.getInputProps("date")}
             />

@@ -35,8 +35,14 @@ function Home() {
         onClose={() => {
           setShowForm(false);
         }}
+        centered
       >
-        <TransactionForm />
+        <TransactionForm 
+          formMode={formMode}
+          setFormMode={setFormMode}
+          setShowForm={setShowForm}
+          showForm={showForm}
+        />
       </Modal>
     </Box>
   )
