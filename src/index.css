@@ -62,3 +62,12 @@ i{
 input {
   border: 1px solid rgb(79, 83, 83) !important;
 }
+
+.container {
+  height: 85vh;
+}
+
+/* for mantine root conatiner */
+.mantine-xoj88x {
+  height: 100% !important;
+}
