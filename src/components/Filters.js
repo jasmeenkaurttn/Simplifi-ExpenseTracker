@@ -1,11 +1,8 @@
 import { Group, Select } from '@mantine/core'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { DateRangePicker, DateRangePickerValue } from '@mantine/dates';
 
 function Filters({ setFilters, filters }) {
-  useEffect(() => {
-    console.log(filters)
-  }, [filters])
   return (
     <Group>
       <Select
@@ -36,7 +33,7 @@ function Filters({ setFilters, filters }) {
         label="Select Type"
         placeholder="Select Type"
         data={[
-          { label: "All", value: "all" },
+          { label: "All", value: "" },
           { label: "Income", value: "income" },
           { label: "Expense", value: "expense" },
         ]}
