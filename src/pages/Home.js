@@ -9,11 +9,14 @@ import { useDispatch } from 'react-redux';
 import { ShowLoading, HideLoading } from '../redux/alertsSlice';
 import TransactionTable from '../components/TransactionTable';
 import Filters from '../components/Filters';
+import moment from 'moment';
 
 function Home() {
   const [filters, setFilters] = useState({
     type: "",
-    frequency: "",
+    frequency: "7",
+    fromDate: "",
+    toDate: ""
   });
   const user = JSON.parse(localStorage.getItem("user"))
   const dispatch = useDispatch();
@@ -24,10 +27,26 @@ function Home() {
 
   const getWhereConditions = () => {
     const tempConditions = [];
-    // query for filtering transactions
+    // query for filtering transactions - type
     if(filters.type !== "") {
       tempConditions.push(where("type", "==", filters.type))
     } 
+    // frequency condition
+    if(filters.frequency !== "custome-range"){
+      if(filters.frequency === "7") {
+        tempConditions.push(
+          where("date", ">=", moment().subtract(7, "days").format("YYYY-MM-DD"))
+        )
+      } else if(filters.frequency === "30"){
+        tempConditions.push(
+          where("date", ">=", moment().subtract(30, "days").format("YYYY-MM-DD"))
+        )
+      } else if(filters.frequency === "365"){
+        tempConditions.push(
+          where("date", ">=", moment().subtract(365, "days").format("YYYY-MM-DD"))
+        )
+      }
+    }
     return tempConditions;
   }
   const getData = async () => {
