@@ -20,14 +20,18 @@ function Filters({ setFilters, filters }) {
         })}
         name='frequency'
       />
-      {filters.frequency === "custom-range" &&
-        <DateRangePicker
-          label="Select Date Range"
-          placeholder="Pick dates range"
-          value={filters.dateRange}
-          zIndex={1000}
-          onChange={(value) => setFilters({ ...filters, dateRange: value })}
-        />}
+      {filters.frequency === "custom-range" && (
+        <div className='w-full'>
+          <DateRangePicker
+            sx={{width: "340px"}}
+            label="Select Date Range"
+            placeholder="Pick dates range"
+            zIndex={1000}
+            dropdownPosition='bottom'
+            onChange={(value) => setFilters({ ...filters, dateRange: value })}
+          />
+        </div>
+      )}
 
       <Select
         label="Select Type"

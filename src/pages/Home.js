@@ -15,8 +15,7 @@ function Home() {
   const [filters, setFilters] = useState({
     type: "",
     frequency: "7",
-    fromDate: "",
-    toDate: ""
+    dateRange: []
   });
   const user = JSON.parse(localStorage.getItem("user"))
   const dispatch = useDispatch();
@@ -32,7 +31,7 @@ function Home() {
       tempConditions.push(where("type", "==", filters.type))
     } 
     // frequency condition
-    if(filters.frequency !== "custome-range"){
+    if(filters.frequency !== "custom-range"){
       if(filters.frequency === "7") {
         tempConditions.push(
           where("date", ">=", moment().subtract(7, "days").format("YYYY-MM-DD"))
@@ -45,7 +44,12 @@ function Home() {
         tempConditions.push(
           where("date", ">=", moment().subtract(365, "days").format("YYYY-MM-DD"))
         )
-      }
+      } 
+    } else {   // custom range date filter
+      const fromDate = moment(filters.dateRange[0]).format("YYYY-MM-DD");
+      const toDate = moment(filters.dateRange[1]).format("YYYY-MM-DD");
+      tempConditions.push(where("date", ">=", fromDate));
+      tempConditions.push(where("date", "<=", toDate));
     }
     return tempConditions;
   }
