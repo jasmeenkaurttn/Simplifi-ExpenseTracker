@@ -57,6 +57,11 @@ code {
 
 i{
   font-size: 1.2rem;
+  cursor: pointer;
+}
+
+i span{
+  cursor: pointer; 
 }
 
 input {
@@ -64,10 +69,6 @@ input {
 }
 
 .container {
-  height: 85vh;
-}
-
-/* for mantine root conatiner */
-.mantine-xoj88x {
-  height: 100% !important;
+  height: 85vh !important;
+  overflow-y: scroll !important;
 }

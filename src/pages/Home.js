@@ -1,17 +1,19 @@
-import { Box, Button, Card, Modal } from '@mantine/core'
+import { Box, Button, Card, Divider, Group, Modal } from '@mantine/core'
 import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import TransactionForm from '../components/TransactionForm';
-import { addDoc, collection, getDocs, orderBy, query, where } from 'firebase/firestore'
+import { collection, getDocs, orderBy, query, where } from 'firebase/firestore'
 import { fireDb } from '../firebaseConfig'
 import { showNotification } from '@mantine/notifications';
 import { useDispatch } from 'react-redux';
 import { ShowLoading, HideLoading } from '../redux/alertsSlice';
 import TransactionTable from '../components/TransactionTable';
 import Filters from '../components/Filters';
+import Analytics from '../components/Analytics';
 import moment from 'moment';
 
 function Home() {
+  const [view, setView] = useState("table")
   const [filters, setFilters] = useState({
     type: "",
     frequency: "7",
@@ -27,24 +29,24 @@ function Home() {
   const getWhereConditions = () => {
     const tempConditions = [];
     // query for filtering transactions - type
-    if(filters.type !== "") {
+    if (filters.type !== "") {
       tempConditions.push(where("type", "==", filters.type))
-    } 
+    }
     // frequency condition
-    if(filters.frequency !== "custom-range"){
-      if(filters.frequency === "7") {
+    if (filters.frequency !== "custom-range") {
+      if (filters.frequency === "7") {
         tempConditions.push(
           where("date", ">=", moment().subtract(7, "days").format("YYYY-MM-DD"))
         )
-      } else if(filters.frequency === "30"){
+      } else if (filters.frequency === "30") {
         tempConditions.push(
           where("date", ">=", moment().subtract(30, "days").format("YYYY-MM-DD"))
         )
-      } else if(filters.frequency === "365"){
+      } else if (filters.frequency === "365") {
         tempConditions.push(
           where("date", ">=", moment().subtract(365, "days").format("YYYY-MM-DD"))
         )
-      } 
+      }
     } else {   // custom range date filter
       const fromDate = moment(filters.dateRange[0]).format("YYYY-MM-DD");
       const toDate = moment(filters.dateRange[1]).format("YYYY-MM-DD");
@@ -86,7 +88,7 @@ function Home() {
       <Header />
       <div className='container'>
         <Card>
-          <div className='flex justify-between'>
+          <div className='flex justify-between items-end'>
             <div>
               <Filters
                 filters={filters}
@@ -94,7 +96,24 @@ function Home() {
                 getData={getData}
               />
             </div>
-            <div>
+            <Group>
+              <Button.Group>
+                <Button
+                  color='blue'
+                  variant={view === "table" ? "filled" : "outline"}
+                  onClick={() => setView("table")}
+                >
+                  Grid
+                </Button>
+
+                <Button
+                  color='blue'
+                  variant={view === "analytics" ? "filled" : "outline"}
+                  onClick={() => setView("analytics")}
+                >
+                  Analytics
+                </Button>
+              </Button.Group>
               <Button
                 color='cyan'
                 onClick={() => {
@@ -104,16 +123,23 @@ function Home() {
               >
                 Add Transaction
               </Button>
-            </div>
+            </Group>
           </div>
 
-          <TransactionTable
-            transactions={transactions}
-            setSelectedTransaction={setSelectedTransaction}
-            setFormMode={setFormMode}
-            setShowForm={setShowForm}
-            getData={getData}
-          />
+          <Divider mt={20}/>
+          {view === "table" && (
+            <TransactionTable
+              transactions={transactions}
+              setSelectedTransaction={setSelectedTransaction}
+              setFormMode={setFormMode}
+              setShowForm={setShowForm}
+              getData={getData}
+            />
+          )}
+
+          {view === "analytics" && (
+            <Analytics transactions={transactions} />
+          )}
         </Card>
       </div>
 
